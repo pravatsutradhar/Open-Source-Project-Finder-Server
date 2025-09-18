@@ -7,6 +7,7 @@ const app = express();
 
 // Import Routes
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 
 // Database Connection
@@ -23,6 +24,7 @@ app.get('/', (req, res)=>{
 
 // Main Routes
 app.use('/api/auth', authRoutes);
+app.use("/api/users", userRoutes);
 
 
 // Error handler (fallback)
