@@ -110,13 +110,13 @@ export const syncProjectFromGitHub = async (req, res) => {
   const { owner, repo } = req.params;
 
   try {
+    const headers = {};
+    if (process.env.GITHUB_TOKEN) {
+      headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
     const githubResponse = await axios.get(
       `https://api.github.com/repos/${owner}/${repo}`,
-      {
-        headers: {
-          Authorization: `token ${process.env.GITHUB_TOKEN}`, // GitHub personal token
-        },
-      }
+      { headers }
     );
 
     const data = githubResponse.data;

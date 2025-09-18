@@ -8,12 +8,22 @@ import Project from "../models/Project.js";
 // @access Private
 export const getUserProfile = async (req, res) => {
   try {
-    const profile = await Profile.findOne({ user: req.user._id })
+    let profile = await Profile.findOne({ user: req.user._id })
       .populate("skills")
       .populate("bookmarks");
 
     if (!profile) {
-      return res.status(404).json({ message: "Profile not found" });
+      await Profile.create({
+        user: req.user._id,
+        bio: "",
+        avatarUrl: "",
+        skills: [],
+        bookmarks: [],
+      });
+
+      profile = await Profile.findOne({ user: req.user._id })
+        .populate("skills")
+        .populate("bookmarks");
     }
 
     res.json(profile);
@@ -39,16 +49,19 @@ export const updateUserProfile = async (req, res) => {
     if (avatarUrl) profile.avatarUrl = avatarUrl;
 
     if (skills && Array.isArray(skills)) {
-      const skillDocs = await Skill.find({ name: { $in: skills } });
-      const existingSkillNames = skillDocs.map((s) => s.name);
+      const existingSkillDocs = await Skill.find({ name: { $in: skills } });
+      const existingSkillNames = existingSkillDocs.map((s) => s.name);
 
-      const newSkills = skills.filter((s) => !existingSkillNames.includes(s));
-      const newSkillDocs = await Skill.insertMany(
-        newSkills.map((name) => ({ name })),
-        { ordered: false }
-      );
+      const newSkillNames = skills.filter((s) => !existingSkillNames.includes(s));
+      let newSkillDocs = [];
+      if (newSkillNames.length > 0) {
+        newSkillDocs = await Skill.insertMany(
+          newSkillNames.map((name) => ({ name })),
+          { ordered: false }
+        );
+      }
 
-      profile.skills = [...skillDocs, ...newSkillDocs].map((s) => s._id);
+      profile.skills = [...existingSkillDocs, ...newSkillDocs].map((s) => s._id);
     }
 
     await profile.save();
@@ -61,6 +74,7 @@ export const updateUserProfile = async (req, res) => {
 // @desc Add project to bookmarks
 // @route POST /api/users/bookmarks/:projectId
 // @access Private
+
 export const addBookmark = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -75,7 +89,7 @@ export const addBookmark = async (req, res) => {
       profile = new Profile({ user: req.user._id, bookmarks: [] });
     }
 
-    if (!profile.bookmarks.includes(projectId)) {
+    if (!profile.bookmarks.some((id) => id.toString() === projectId)) {
       profile.bookmarks.push(projectId);
       await profile.save();
     }

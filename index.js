@@ -5,7 +5,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 const app = express();
 
-// Import All Routes
+// Import Main Routes
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
@@ -16,7 +16,11 @@ connectDB();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: (process.env.CORS_ORIGINS || 'http://localhost:5173').split(','),
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true
+}));
 
 // Basic Route
 app.get('/', (req, res)=>{

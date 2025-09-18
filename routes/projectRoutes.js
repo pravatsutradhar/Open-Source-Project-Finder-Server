@@ -7,7 +7,7 @@ import {
   deleteProject,
   syncProjectFromGitHub,
 } from "../controllers/projectController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -16,9 +16,9 @@ router.get("/", getProjects);
 router.get("/:id", getProjectById);
 
 // Admin-only routes
-router.post("/", protect, createProject);
-router.put("/:id", protect, updateProject);
-router.delete("/:id", protect, deleteProject);
-router.post("/sync/:owner/:repo", protect, syncProjectFromGitHub);
+router.post("/", protect, isAdmin, createProject);
+router.put("/:id", protect, isAdmin, updateProject);
+router.delete("/:id", protect, isAdmin, deleteProject);
+router.post("/sync/:owner/:repo", protect, isAdmin, syncProjectFromGitHub);
 
 export default router;
