@@ -5,9 +5,10 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 const app = express();
 
-// Import Routes
+// Import All Routes
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
 
 
 // Database Connection
@@ -25,6 +26,7 @@ app.get('/', (req, res)=>{
 // Main Routes
 app.use('/api/auth', authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/projects", projectRoutes);
 
 
 // Error handler (fallback)
